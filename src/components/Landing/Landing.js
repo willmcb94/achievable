@@ -1,6 +1,7 @@
 import './Landing.css';
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Landing() {
   return (
@@ -14,7 +15,9 @@ export default function Landing() {
           <dt>Henry Ford</dt>
         </h2>
         <button>Sign In</button>
-        <button>Sign Up</button>
+        <button>
+          <Link to="/signup">Sign Up</Link>
+        </button>
       </main>
     </div>
   );
