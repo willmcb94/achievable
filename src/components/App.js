@@ -1,11 +1,11 @@
 import React from 'react';
 import Signup from './Signup/Signup';
+import Landing from './Landing/Landing';
 
 function App() {
   return (
     <>
-      <h2>'Achievable'</h2>
-      <Signup />
+      <Landing />
     </>
   );
 }
