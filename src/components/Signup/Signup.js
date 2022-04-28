@@ -1,10 +1,11 @@
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { auth } from '../../firebase.js';
+import { auth, db } from '../../firebase.js';
 
 import React, { useContext, useState } from 'react';
 import './Signup.css';
 import { UserContext } from '../../contexts/UserContext.js';
 import { useNavigate } from 'react-router-dom';
+import { ref, set } from 'firebase/database';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -13,7 +14,8 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { setUser } = useContext(UserContext);
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -27,8 +29,18 @@ export default function Signup() {
     try {
       setError('');
       setLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password);
-      setUser(name);
+      await createUserWithEmailAndPassword(auth, email, password).then(
+        (res) => {
+          set(ref(db, `data/users/${res.user.uid}`), {
+            uid: res.user.uid,
+            createdAt: Date.now(),
+            email: `${email}`,
+            firstName,
+            lastName,
+          });
+        }
+      );
+      setUser(firstName);
       navigate('/goals');
     } catch {
       setError('Failed to create account');
@@ -47,12 +59,17 @@ export default function Signup() {
             type="text"
             name="firstName"
             required
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setFirstName(e.target.value)}
           />
         </label>
         <label className="signup-form-input">
           Last Name:
-          <input type="text" name="lastName" required />
+          <input
+            type="text"
+            name="lastName"
+            required
+            onChange={(e) => setLastName(e.target.value)}
+          />
         </label>
         <label className="signup-form-input">
           Email:{' '}
@@ -82,14 +99,11 @@ export default function Signup() {
           />
         </label>
         {error ? <p>{error}</p> : null}
-        <button
-          disabled={loading}
-          type="submit"
-          value="Submit"
-          onClick={(e) => handleSubmit(e)}
-        >
+
+        <button type="submit" value="Submit" onClick={(e) => handleSubmit(e)}>
           Submit
         </button>
+        {loading ? <p>Processing...</p> : null}
       </form>
     </div>
   );
