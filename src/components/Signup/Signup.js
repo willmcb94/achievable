@@ -5,7 +5,7 @@ import React, { useContext, useState } from 'react';
 import './Signup.css';
 import { UserContext } from '../../contexts/UserContext.js';
 import { useNavigate } from 'react-router-dom';
-import { ref, set } from 'firebase/database';
+import { onValue, ref, set } from 'firebase/database';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -29,8 +29,8 @@ export default function Signup() {
     try {
       setError('');
       setLoading(true);
-      await createUserWithEmailAndPassword(auth, email, password).then(
-        (res) => {
+      await createUserWithEmailAndPassword(auth, email, password)
+        .then((res) => {
           set(ref(db, `data/users/${res.user.uid}`), {
             uid: res.user.uid,
             createdAt: Date.now(),
@@ -38,11 +38,18 @@ export default function Signup() {
             firstName,
             lastName,
           });
-        }
-      );
-      setUser(firstName);
+
+          return res.user.uid;
+        })
+        .then((res) => {
+          onValue(ref(db, `data/users/${res}`), (dbUser) => {
+            setUser(dbUser.val());
+          });
+        });
+
       navigate('/goals');
-    } catch {
+    } catch (err) {
+      console.log(err);
       setError('Failed to create account');
     }
   };

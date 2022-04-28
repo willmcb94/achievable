@@ -1,21 +1,28 @@
 import './Landing.css';
-import { auth } from '../../firebase.js';
-import React, { useState } from 'react';
+import { auth, db } from '../../firebase.js';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { UserContext } from '../../contexts/UserContext';
+import { onValue, ref } from 'firebase/database';
 
 export default function Landing() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email, password).then((res) => {
+        onValue(ref(db, `data/users/${res.user.uid}`), (dbUser) => {
+          setUser(dbUser.val());
+        });
+      });
+
       navigate('/goals');
     } catch {
       setError('Failed to login, please check your details');
