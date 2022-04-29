@@ -21,6 +21,7 @@ export default function Goals() {
   const [userState, setUserState] = useState(user);
   const [goals, setGoals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  // const [noGoals, setNoGoals] = useState(true)
 
   UserToLocalStorage(userState, setUserState);
   //function above stores user data locally to state so they persist through refresh
@@ -30,6 +31,7 @@ export default function Goals() {
       onValue(ref(db, `data/goals/${userState.uid}`), (userGoals) => {
         if (userGoals.val()) {
           setGoals(Object.entries(userGoals.val()));
+
           setIsLoading(false);
         } else {
           setIsLoading(true);
@@ -41,44 +43,46 @@ export default function Goals() {
   }, [userState, goals]);
 
   const handleDeleteComplete = async (goal) => {
-    console.log(goal[0], '<---');
     remove(ref(db, `data/goals/${userState.uid}/${goal[0]}`));
   };
 
-  if (isLoading) {
-    return <h3>Loading...</h3>;
-  }
+  //   if (isLoading) {
+  //     return <h3>Loading...</h3>;
+  //   }
 
   return (
     <div>
       <h1>Goals</h1>
       <p>Hey {userState.firstName}</p>
       <main>
-        {goals.map((goal, index) => {
-          return (
-            <article key={index}>
-              <p>{goal[1].goal}</p>
-              <button
-                type="delete"
-                value="delete"
-                onClick={() => {
-                  handleDeleteComplete(goal);
-                }}
-              >
-                Delete goal
-              </button>
-              <button
-                type="delete"
-                value="delete"
-                onClick={() => {
-                  handleDeleteComplete(goal);
-                }}
-              >
-                Goal complete
-              </button>
-            </article>
-          );
-        })}
+        {!isLoading
+          ? goals.map((goal, index) => {
+              return (
+                <article key={index}>
+                  <p>{goal[1].goal}</p>
+                  <button
+                    type="delete"
+                    value="delete"
+                    onClick={() => {
+                      handleDeleteComplete(goal);
+                    }}
+                  >
+                    Delete goal
+                  </button>
+                  <button
+                    type="delete"
+                    value="delete"
+                    onClick={() => {
+                      handleDeleteComplete(goal);
+                    }}
+                  >
+                    Goal complete
+                  </button>
+                </article>
+              );
+            })
+          : null}
+
         <button type="add" value="Add">
           <Link to="/add-a-goal">Add a new goal</Link>
         </button>

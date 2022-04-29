@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../firebase';
 import { UserToLocalStorage } from '../../util/util';
+import AddMiniTask from './AddMiniTask/AddMiniTask';
 import './AddAGoal.css';
 
 const intialFormData = Object.freeze({
@@ -16,6 +17,8 @@ export default function AddAGoal() {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const [userState, setUserState] = useState(user);
+  const [miniTasks, setMiniTasks] = useState([]);
+  const [rating, setRating] = useState(5);
 
   UserToLocalStorage(userState, setUserState);
   //function above stores user data locally to state so they persist through refresh
@@ -33,6 +36,7 @@ export default function AddAGoal() {
       await push(ref(db, `data/goals/${userState.uid}`), {
         goal: formData.goal,
         date: formData.date,
+        miniTasks: miniTasks,
       });
       navigate('/goals');
     } catch (err) {
@@ -51,6 +55,7 @@ export default function AddAGoal() {
             onChange={(e) => {
               handleChange(e);
             }}
+            required
           ></textarea>
           <label>Date to complete by: </label>
           <input
@@ -59,13 +64,22 @@ export default function AddAGoal() {
             onChange={(e) => {
               handleChange(e);
             }}
+            required
           ></input>
+          <AddMiniTask miniTasks={miniTasks} setMiniTasks={setMiniTasks} />
+          <label>Please select importance </label>
+
           <button
             type="submit"
             onClick={(e) => {
               handleSubmit(e);
             }}
-          ></button>
+          >
+            Submit
+          </button>
+          <button type="cancel" onClick={() => navigate('/goals')}>
+            Cancel
+          </button>
         </form>
       </main>
     </div>
