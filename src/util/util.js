@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-export const UserToLocal = (userState, setUserState) => {
+export const UserToLocalStorage = (userState, setUserState) => {
   useEffect(() => {
     const userStateData = JSON.parse(localStorage.getItem('userState'));
 

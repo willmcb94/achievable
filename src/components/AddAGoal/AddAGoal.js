@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { db } from '../../firebase';
-import { UserToLocal } from '../../util/util';
+import { UserToLocalStorage } from '../../util/util';
 import './AddAGoal.css';
 
 const intialFormData = Object.freeze({
@@ -14,10 +14,10 @@ const intialFormData = Object.freeze({
 export default function AddAGoal() {
   const [formData, setFormData] = useState(intialFormData);
   const { user } = useContext(UserContext);
-
+  const navigate = useNavigate();
   const [userState, setUserState] = useState(user);
 
-  UserToLocal(userState, setUserState);
+  UserToLocalStorage(userState, setUserState);
   //function above stores user data locally to state so they persist through refresh
   const handleChange = (e) => {
     setFormData({
@@ -30,10 +30,11 @@ export default function AddAGoal() {
     e.preventDefault();
     console.log(user, '<<<<');
     try {
-      await push(ref(db, `data/goals/${user.uid}`), {
+      await push(ref(db, `data/goals/${userState.uid}`), {
         goal: formData.goal,
         date: formData.date,
       });
+      navigate('/goals');
     } catch (err) {
       console.log(err);
     }
